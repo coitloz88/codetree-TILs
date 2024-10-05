@@ -21,7 +21,6 @@ def check_movable(r, c, dr, dc):
             return False
     return True
 
-queue = deque([])
 forest_middle = {}
 answer = 0
 
@@ -31,20 +30,19 @@ for i, (start, exit_dir) in enumerate(golems):
 
     # i번째 골렘 이동 로직 루프
     while True:
-        if (check_movable(r, c, [1, 2, 1], [-1, 0, 1])):
+        if (check_movable(r, c, [1,2,1], [-1,0,1])):
             r, c = r + 1, c
-        elif (check_movable(r, c, [-1, 0, 1, 1, 2], [-1, -2, 1, -2, -1])):
-            r, c = r, c - 1
+        elif (check_movable(r, c-1, [-1,1,0,1,2], [0,0,-1,-1,0])):
+            r, c = r + 1, c - 1
             exit_dir = (exit_dir - 1) % 4 # 반시계 방향으로 출구 회전
-        elif (check_movable(r, c, [-1, 0, 1, 1, 2], [1, 2, 1, 2, 1])):
-            r, c = r, c + 1
+        elif (check_movable(r, c+1, [-1,0,1,2,1], [0,1,0,0,1])):
+            r, c = r + 1, c + 1
             exit_dir = (exit_dir + 1) % 4 # 시계 방향으로 출구 회전
         else:
             break # 어디로도 이동 불가한 경우 골렘 이동 중지
 
     if r < 4: # 골렘이 맵 안으로 완전히 못 들어온 경우 숲 초기화
         forest = [[-1] * C for _ in range(R)] # 숲 초기화
-        queue = deque([])
         forest_middle = {}
         continue # bfs 수행 없이 다음 골렘으로 넘어감
     
@@ -57,22 +55,22 @@ for i, (start, exit_dir) in enumerate(golems):
     # print(forest)
 
     # TODO: 각 요정 최종 이동 후 행 번호 누적 (BFS)
-    queue.append((r, c, exit_dir)) # 요정 시작 위치
-    visited = []
-    max_row = 0
+    queue = deque() # 요정 시작 위치
+    queue.append((r, c, exit_dir))
+    visited = [(r, c, exit_dir)]
+    max_row = r + 1 - 2
     while queue:
         cur_loc = queue.popleft()
 
-        if cur_loc not in visited:
-            visited.append(forest_middle[forest[cur_loc[0]][cur_loc[1]]])
+        exit = (cur_loc[0] + dr[cur_loc[2]], cur_loc[1] + dc[cur_loc[2]])
+        max_row = max(max_row, cur_loc[0] + 1 - 2)
 
-            exit = (cur_loc[0] + dr[cur_loc[2]], cur_loc[1] + dc[cur_loc[2]])
-            max_row = max(max_row, cur_loc[0] + 1 - 2)
+        for dir_idx in range(4):
+            nr, nc = exit[0] + dr[dir_idx], exit[1] + dc[dir_idx]
+            if check_range(nr, nc) and forest[nr][nc] >= 0 and forest[nr][nc] != i and forest_middle[forest[nr][nc]] not in visited:
+                queue.append(forest_middle[forest[nr][nc]])
+                visited.append(forest_middle[forest[nr][nc]])
 
-            for dir_idx in range(4):
-                nr, nc = exit[0] + dr[dir_idx], exit[1] + dc[dir_idx]
-                if check_range(nr, nc) and forest[nr][nc] >= 0 and forest[nr][nc] != i: # and forest_middle[forest[nr][nc]] not in visited:
-                    queue.append(forest_middle[forest[nr][nc]])
     answer += max_row
 
 print(answer)
