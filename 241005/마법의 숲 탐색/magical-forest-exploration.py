@@ -62,15 +62,17 @@ for i, (start, exit_dir) in enumerate(golems):
     max_row = 0
     while queue:
         cur_loc = queue.popleft()
-        
-        exit = (cur_loc[0] + dr[cur_loc[2]], cur_loc[1] + dc[cur_loc[2]])
-        max_row = max(max_row, cur_loc[0] + 1 - 2)
 
-        for dir_idx in range(4):
-            nr, nc = exit[0] + dr[dir_idx], exit[1] + dc[dir_idx]
-            if check_range(nr, nc) and forest[nr][nc] >= 0 and forest[nr][nc] != i and forest_middle[forest[nr][nc]] not in visited:
-                queue.append(forest_middle[forest[nr][nc]])
-                visited.append(forest_middle[forest[nr][nc]])
+        if cur_loc not in visited:
+            visited.append(forest_middle[forest[cur_loc[0]][cur_loc[1]]])
+
+            exit = (cur_loc[0] + dr[cur_loc[2]], cur_loc[1] + dc[cur_loc[2]])
+            max_row = max(max_row, cur_loc[0] + 1 - 2)
+
+            for dir_idx in range(4):
+                nr, nc = exit[0] + dr[dir_idx], exit[1] + dc[dir_idx]
+                if check_range(nr, nc) and forest[nr][nc] >= 0 and forest[nr][nc] != i: # and forest_middle[forest[nr][nc]] not in visited:
+                    queue.append(forest_middle[forest[nr][nc]])
     answer += max_row
 
 print(answer)
